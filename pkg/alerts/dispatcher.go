@@ -42,7 +42,11 @@ func (d *Dispatcher) SendAlert(target, commonName string, daysRemaining float64)
 		Message:       fmt.Sprintf("⚠️ SSL/TLS Certificate for %s expires in %.1f days!", target, daysRemaining),
 	}
 
-	body, _ := json.Marshal(payload)
+	body, err := json.Marshal(payload)
+	if err != nil {
+		log.Printf("[Alert Error] Failed to marshal webhook payload for %s: %v\n", target, err)
+		return
+	}
 	resp, err := d.client.Post(d.webhookURL, "application/json", bytes.NewBuffer(body))
 	if err != nil {
 		log.Printf("[Alert Error] Failed to send webhook alert for %s: %v\n", target, err)
